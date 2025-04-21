@@ -1,6 +1,5 @@
+import os
+from utils.env import load_env_file
 from services import spotify_requests as sr
 
-spotify_client_secret = input("Client Secret: ")
-
-token = sr.get_spotify_token(spotify_client_secret)
-print(token)
+load_env_file()
