@@ -1,8 +1,24 @@
+import os
 import http.client
 import urllib.parse
 import json
 
-def get_spotify_token(secret):
+def generate_auth_url():
+    client_id = os.getenv("SPOTIFY_CLIENT_ID")
+    redirect_uri = "http://localhost:8888/callback"
+    scope = "playlist-read-private user-library-read user-read-playback-state user-modify-playback-state"
+
+    params = {
+        "client_id": client_id,
+        "response_type": "code",
+        "redirect_uri": redirect_uri,
+        "scope": scope
+    }
+
+    auth_url = "https://accounts.spotify.com/authorize?" + urllib.parse.urlencode(params)
+    print(auth_url)
+
+def get_spotify_client_token(secret):
     host = "accounts.spotify.com"
     endpoint = "/api/token"
 
@@ -12,7 +28,7 @@ def get_spotify_token(secret):
 
     data = urllib.parse.urlencode({
         "grant_type": "client_credentials",
-        "client_id": "ca6300b771ea4ddd8a3d1406f9b76f68",
+        "client_id": "",
         "client_secret": secret
     })
 
