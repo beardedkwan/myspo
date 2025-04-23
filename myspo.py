@@ -5,4 +5,4 @@ from services import spotify_requests as sr
 load_env_file()
 #os.getenv("SPOTIFY_CLIENT_ID")
 
-sr.generate_auth_url()
+sr.get_playlists()
