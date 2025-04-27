@@ -79,4 +79,39 @@ def get_spotify_client_token(secret):
     return token_dict
 
 def refresh_access_token():
-    #todo
+    host = "accounts.spotify.com"
+    endpoint = "/api/token"
+
+    data = urllib.parse.urlencode({
+        "grant_type": "refresh_token",
+        "refresh_token": os.getenv("SPOTIFY_REFRESH_TOKEN"),
+        "client_id": os.getenv("SPOTIFY_CLIENT_ID")
+    })
+
+    client_id = os.getenv("SPOTIFY_CLIENT_ID")
+    client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
+    auth_string = f"{client_id}:{client_secret}"
+    auth_b64 = base64.b64encode(auth_string.encode("utf-8")).decode("utf-8")
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": f"Basic {auth_b64}"
+    }
+
+    conn = http.client.HTTPSConnection(host)
+
+    conn.request("POST", endpoint, body=data, headers=headers)
+
+    resp = conn.getresponse()
+
+    resp_code = resp.status
+    resp_dict = {}
+
+    if (resp_code == 200):
+        resp_dict = json.loads(resp.read().decode())
+        # Left off here
+
+    conn.close()
+
+    print(resp_code)
+    print(resp_dict)
