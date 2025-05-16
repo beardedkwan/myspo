@@ -3,6 +3,7 @@ import http.client
 import urllib.parse
 import json
 import base64
+import time
 
 def generate_auth_url():
     client_id = os.getenv("SPOTIFY_CLIENT_ID")
@@ -109,9 +110,13 @@ def refresh_access_token():
 
     if (resp_code == 200):
         resp_dict = json.loads(resp.read().decode())
-        # Left off here
 
     conn.close()
 
-    print(resp_code)
-    print(resp_dict)
+    if resp_dict:
+        os.environ["SPOTIFY_ACCESS_TOKEN"] = resp_dict["access_token"]
+
+        BUFFER = 5
+        expires_in = int(resp_dict["expires_in"]) - BUFFER
+        expire_date = time.time() + expires_in
+        os.environ["SPOTIFY_ACCESS_TOKEN_EXPIRES"] = str(expire_date)

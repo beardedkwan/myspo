@@ -1,15 +1,20 @@
 import os
+from pathlib import Path
 
-def load_env_file(path=".env"):
+def load_env_file(filename=".env"):
     """
     Load environment variables from a file into os.environ.
 
+    The .env file is expected to be one directory up from this script.
     Each line should be in KEY=VALUE format. Lines starting with # are ignored.
     """
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"No .env file found at: {path}")
+    script_dir = Path(__file__).resolve().parent
+    env_path = script_dir.parent / filename
 
-    with open(path) as f:
+    if not env_path.exists():
+        raise FileNotFoundError(f"No .env file found at: {env_path}")
+
+    with env_path.open() as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#") or "=" not in line:
