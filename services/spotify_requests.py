@@ -5,20 +5,27 @@ import json
 import base64
 from .spotify_auth import refresh_access_token
 import time
-from rich import print
-from rich.table import Table
+from utils import debug
+from utils.env import load_env_file
+
+load_env_file()
 
 def check_auth(func):
     def wrapper(*args, **kwargs):
         now = time.time()
         token_expires_str = os.getenv("SPOTIFY_ACCESS_TOKEN_EXPIRES")
 
+        debug.log({"SPOTIFY_ACCESS_TOKEN_EXPIRES": token_expires_str})
+
         try:
             token_expires = float(token_expires_str) if token_expires_str is not None else 0.0
         except ValueError:
             token_expires = 0.0
 
+        debug.log({"now": now, "expires": float(token_expires)})
+
         if (now > float(token_expires)):
+            debug.log("Refreshing access token...")
             refresh_access_token()
 
         return func(*args, **kwargs)
@@ -44,20 +51,10 @@ def get_playlists():
 
     code = resp.status
     data = {}
+
     if (code == 200):
         data = json.loads(resp.read())
 
     conn.close()
 
-    if data:
-        table = Table(title="Playlists")
-
-        table.add_column("Name", style="cyan", no_wrap=True)
-        table.add_column("Tracks", justify="right")
-
-        for item in data["items"]:
-            name = item["name"]
-            tracks = str(item["tracks"]["total"])
-            table.add_row(name, tracks)
-
-        print(table)
+    return data

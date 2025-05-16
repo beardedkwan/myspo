@@ -4,6 +4,11 @@ import urllib.parse
 import json
 import base64
 import time
+from utils import debug
+from dotenv import set_key
+from utils.env import load_env_file
+
+load_env_file()
 
 def generate_auth_url():
     client_id = os.getenv("SPOTIFY_CLIENT_ID")
@@ -85,8 +90,7 @@ def refresh_access_token():
 
     data = urllib.parse.urlencode({
         "grant_type": "refresh_token",
-        "refresh_token": os.getenv("SPOTIFY_REFRESH_TOKEN"),
-        "client_id": os.getenv("SPOTIFY_CLIENT_ID")
+        "refresh_token": os.getenv("SPOTIFY_REFRESH_TOKEN")
     })
 
     client_id = os.getenv("SPOTIFY_CLIENT_ID")
@@ -105,18 +109,24 @@ def refresh_access_token():
 
     resp = conn.getresponse()
 
+    resp_body = resp.read()
     resp_code = resp.status
     resp_dict = {}
 
+    debug.log(resp_code)
+    debug.log(resp_body)
+
     if (resp_code == 200):
-        resp_dict = json.loads(resp.read().decode())
+        resp_dict = json.loads(resp_body)
 
     conn.close()
 
     if resp_dict:
-        os.environ["SPOTIFY_ACCESS_TOKEN"] = resp_dict["access_token"]
+        set_key(".env", "SPOTIFY_ACCESS_TOKEN", resp_dict["access_token"])
 
         BUFFER = 5
-        expires_in = int(resp_dict["expires_in"]) - BUFFER
+        expires_in = float(resp_dict["expires_in"]) - BUFFER
         expire_date = time.time() + expires_in
-        os.environ["SPOTIFY_ACCESS_TOKEN_EXPIRES"] = str(expire_date)
+        set_key(".env", "SPOTIFY_ACCESS_TOKEN_EXPIRES", str(expire_date))
+
+        # left off here - expire date is not persisting in the .env file, resulting in refreshing the access token every call.
