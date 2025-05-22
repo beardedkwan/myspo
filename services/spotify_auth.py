@@ -7,6 +7,7 @@ import time
 from utils import debug
 from dotenv import set_key
 from utils.env import load_env_file
+from utils.env import get_env_path
 
 load_env_file()
 
@@ -122,11 +123,9 @@ def refresh_access_token():
     conn.close()
 
     if resp_dict:
-        set_key(".env", "SPOTIFY_ACCESS_TOKEN", resp_dict["access_token"])
+        set_key(get_env_path(), "SPOTIFY_ACCESS_TOKEN", resp_dict["access_token"])
 
         BUFFER = 5
         expires_in = float(resp_dict["expires_in"]) - BUFFER
         expire_date = time.time() + expires_in
-        set_key(".env", "SPOTIFY_ACCESS_TOKEN_EXPIRES", str(expire_date))
-
-        # left off here - expire date is not persisting in the .env file, resulting in refreshing the access token every call.
+        set_key(get_env_path(), "SPOTIFY_ACCESS_TOKEN_EXPIRES", str(expire_date))

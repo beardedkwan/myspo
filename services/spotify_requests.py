@@ -7,15 +7,17 @@ from .spotify_auth import refresh_access_token
 import time
 from utils import debug
 from utils.env import load_env_file
+from utils.env import get_env_path
+from dotenv import get_key
 
 load_env_file()
 
 def check_auth(func):
     def wrapper(*args, **kwargs):
         now = time.time()
-        token_expires_str = os.getenv("SPOTIFY_ACCESS_TOKEN_EXPIRES")
-
-        debug.log({"SPOTIFY_ACCESS_TOKEN_EXPIRES": token_expires_str})
+        token_expires_str = get_key(get_env_path(), "SPOTIFY_ACCESS_TOKEN_EXPIRES")
+        if token_expires_str:
+            token_expires_str = token_expires_str.strip("\"'")
 
         try:
             token_expires = float(token_expires_str) if token_expires_str is not None else 0.0
@@ -37,7 +39,7 @@ def get_playlists():
     host = "api.spotify.com"
     endpoint = "/v1/me/playlists"
 
-    token = os.getenv("SPOTIFY_ACCESS_TOKEN")
+    token = get_key(get_env_path(), "SPOTIFY_ACCESS_TOKEN")
 
     headers = {
         "Authorization": f"Bearer {token}"
@@ -54,6 +56,8 @@ def get_playlists():
 
     if (code == 200):
         data = json.loads(resp.read())
+    else:
+        debug.log(resp.read())
 
     conn.close()
 

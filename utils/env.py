@@ -21,3 +21,10 @@ def load_env_file(filename=".env"):
                 continue
             key, value = line.split("=", 1)
             os.environ[key.strip()] = value.strip()
+
+def get_env_path():
+    current = Path(__file__).resolve()
+    for parent in current.parents:
+        if parent.name == "myspo":
+            return parent / ".env"
+    raise FileNotFoundError("Could not locate 'myspo' project root.")
